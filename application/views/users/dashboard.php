@@ -47,7 +47,10 @@
             </div>
           </li>
           <li>
-            <a href="<?= base_url('dashboard') ?>"><i class="fa fa-tachometer"></i> <span class="nav-label">Dashboard</span></a>
+            <a href="<?= base_url('Dashboard') ?>"><i class="fa fa-tachometer"></i> <span class="nav-label">Dashboard</span></a>
+          </li>
+          <li>
+            <a href="<?= base_url('HistoryJual') ?>"><i class="fa fa-money"></i> <span class="nav-label">History Jual</span></a>
           </li>
         </ul>
 
@@ -135,7 +138,7 @@
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <h4 class="modal-title">Beli Cryptocurrency</h4>
                   </div>
-                  <form method="post" action="<?= base_url('users/beli') ?>">
+                  <form method="post" action="<?= base_url('beli') ?>">
                     <div class="modal-body">
                       <div class="row">
                         <div class="col-md-6">
@@ -188,7 +191,7 @@
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <h4 class="modal-title">Jual Cryptocurrency</h4>
                   </div>
-                  <form method="post" action="<?= base_url('users/jual') ?>">
+                  <form method="post" action="<?= base_url('jual') ?>">
                     <div class="modal-body">
                       <div class="row">
                         <div class="col-md-6">
@@ -310,7 +313,7 @@
         dom: '<"html5buttons"B>lTfgitp',
         buttons: [],
         "ordering": false,
-        "ajax": "<?= base_url('Users/ajaxCrypto') ?>",
+        "ajax": "<?= base_url('ajaxCrypto') ?>",
         "columns": [{
           'data': 'no'
         }, {

@@ -14,7 +14,7 @@ class Users extends CI_Controller
     $this->data = array('profil' => $this->u->profilAkun(userdata('user_id'))->row());
   }
 
-  public function dashboard()
+  public function Dashboard()
   {
     $data = $this->data;
     $data['crypto']             = $this->u->getCryptocurrency()->result();
@@ -46,7 +46,7 @@ class Users extends CI_Controller
       );
       $this->u->insertData('beli', $input);
       set_flashdata('msg', '<div class="alert alert-success">Transaksi sukses disimpan</div>');
-      redirect('users/dashboard');
+      redirect('dashboard');
     }
   }
 
@@ -76,7 +76,7 @@ class Users extends CI_Controller
       $update         = array('sisa' => $sisa);
       $this->u->updateData('beli', $update, 'id_beli', $sumber);
       set_flashdata('msg', '<div class="alert alert-success">Transaksi sukses disimpan</div>');
-      redirect('users/dashboard');
+      redirect('dashboard');
     }
   }
 
@@ -135,6 +135,23 @@ class Users extends CI_Controller
     return ($nilaiAset * -1);
   }
 
+  public function HistoryJual()
+  {
+    $data = $this->data;
+    $data['total']  = $this->totalHistoryJual();
+    view('users/HistoryJual', $data);
+  }
+
+  public function totalHistoryJual()
+  {
+    $total = 0;
+    $data = $this->db->query("SELECT * FROM jual JOIN cryptocurrency ON jual.id_crypto = cryptocurrency.no WHERE user_id = '" . userdata('user_id') . "'")->result();
+    foreach ($data as $d) {
+      $total = $total + $d->hasil;
+    }
+    return $total;
+  }
+
   public function ajaxCrypto()
   {
     $no = 1;
@@ -167,6 +184,39 @@ class Users extends CI_Controller
     $tampil = array('data' => $hasil);
     echo json_encode($tampil);
     //echo $obj->tickers->btc_idr->sell;
+  }
+
+  public function ajaxHistoryJual()
+  {
+    $no = 1;
+    $hasil = array();
+    $tampil = array();
+    $json = file_get_contents("https://indodax.com/api/summaries");
+    $obj = json_decode($json, TRUE);
+    $data = $this->db->query("SELECT * FROM jual JOIN cryptocurrency ON jual.id_crypto = cryptocurrency.no WHERE user_id = '" . userdata('user_id') . "'")->result();
+    foreach ($data as $d) {
+      $kode = strtolower(str_replace('/', '_', $d->kode));
+      $hitung_persentase = round(((($d->harga_jual - $d->harga_beli) * $d->jumlah_crypto) / ($d->harga_beli * $d->jumlah_crypto)) * 100, 2);
+      if ($hitung_persentase > 0) {
+        $persen = '<p><span class="label label-primary">' . $hitung_persentase . '%</span></p>';
+        $rupiah = '<p><span class="label label-primary">Rp ' . number_format(($d->harga_jual * $d->jumlah_crypto) - ($d->harga_beli * $d->jumlah_crypto), 0, ",", ".") . '</span></p>';
+      } elseif ($hitung_persentase < 0) {
+        $persen = '<p><span class="label label-danger">' . $hitung_persentase . '%</span></p>';
+        $rupiah = '<p><span class="label label-danger">Rp ' . number_format(($d->harga_jual * $d->jumlah_crypto) - ($d->harga_beli * $d->jumlah_crypto), 0, ",", ".") . '</span></p>';
+      }
+      $hasil[] = array(
+        'no'  => $no++,
+        'cryptocurrency'  => $obj['tickers'][$kode]['name'] . " (" . $d->kode . ")",
+        'tanggal_jual'    => tanggal_indonesia_medium($d->tanggal_jual),
+        'harga_jual'      => 'Rp ' . number_format($d->harga_jual, 0, ",", "."),
+        'harga_beli'      => 'Rp ' . number_format($d->harga_beli, 0, ",", "."),
+        'koin'            => number_format($d->jumlah_crypto, 2, ",", "."),
+        'persentase'      => $persen,
+        'rupiah'          => $rupiah
+      );
+    }
+    $tampil = array('data' => $hasil);
+    echo json_encode($tampil);
   }
 
   public function ajax()
